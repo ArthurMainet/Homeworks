@@ -56,7 +56,10 @@ func (e *EmailHandler) ReciveEmail() http.HandlerFunc {
 		err = e.WritingEmail(mail, text)
 		if err != nil {
 			packages.ResponceJSON(w, "Coudn't send mail. Retry please.", http.StatusInternalServerError)
+			return
 		}
+		packages.ResponceJSON(w, "Mail with registration-URL already send to your email address", http.StatusOK)
+
 		err = e.Repo.Save()
 		if err != nil {
 			log.Println("Email and hash didn't save. Reason: ", err)
@@ -81,7 +84,8 @@ func (e *EmailHandler) Verify() http.HandlerFunc {
 			packages.ResponceJSON(w, "You are welcome!", 200)
 		} else {
 			packages.ResponceJSON(w, "Wrong register hash.", http.StatusUnauthorized)
-			e.Repo.Delete(hash)
 		}
+		e.Repo.Delete(hash)
+		e.Repo.Save()
 	}
 }

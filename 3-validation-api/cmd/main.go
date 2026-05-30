@@ -2,7 +2,7 @@ package main
 
 import (
 	"Email-API/config"
-	"Email-API/packages"
+	"Email-API/internal"
 	"log"
 	"net/http"
 )
@@ -11,9 +11,9 @@ func main() {
 	conf := config.LoadConfig()
 
 	router := http.NewServeMux()
-	info := packages.NewEmailHandler(packages.EmailHandlerDeps{Config: conf})
+	info := internal.NewEmailHandler(internal.EmailHandlerDeps{Config: conf})
 
-	router.HandleFunc("POST /send", info.Send())
+	router.HandleFunc("POST /send", info.ReciveEmail())
 	router.HandleFunc("GET /verify/{hash}", info.Verify())
 
 	server := http.Server{
@@ -21,6 +21,7 @@ func main() {
 		Handler: router,
 	}
 
+	log.Println("Starting to listen on port :8080")
 	err := server.ListenAndServe()
 	if err != nil {
 		log.Fatalln(err)

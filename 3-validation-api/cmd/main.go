@@ -21,11 +21,11 @@ func main() {
 	router.HandleFunc("GET /verify/{hash}", info.Verify())
 
 	server := http.Server{
-		Addr:    ":8080",
+		Addr:    ":8081",
 		Handler: router,
 	}
 
-	log.Println("Starting to listen on port :8080")
+	log.Println("Starting to listen on port :8081")
 	err := server.ListenAndServe()
 	if err != nil {
 		log.Fatalln(err)

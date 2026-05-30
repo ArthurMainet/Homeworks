@@ -49,25 +49,24 @@ func (e *EmailHandler) ReciveEmail() http.HandlerFunc {
 		mail := model.Email
 		hash := model.Hash
 		e.Repo.EmailAndHash[hash] = model
-		text := "http://localhost:8080/verify/" + hash
-		e.WritingEmail(mail, text)
+		text := "http://localhost:8081/verify/" + hash
 
-		// сохраняем email с хешем, записывая ее в буфер, откуда потом прочитаем
-		// var buf bytes.Buffer
-		// err = json.NewEncoder(&buf).Encode(hashedEmail)
-		// if err != nil {
-		// 	log.Println(err)
-		// }
+		err = e.WritingEmail(mail, text)
+		if err != nil {
+			packages.ResponceJSON(w, "Coudn't send mail. Retry please.", http.StatusInternalServerError)
+		}
+		e.Repo.Save()
 
 	}
 }
 
-func (em *EmailHandler) WritingEmail(mail, text string) {
+func (em *EmailHandler) WritingEmail(mail, text string) error {
 	e := email.NewEmail()
 	e.From = "BabyMelo <testbabymail@mail.ru>"
 	e.To = []string{mail}
 	e.Text = []byte(text)
-	e.Send("smtp.gmail.com:587", smtp.PlainAuth("", em.Email, em.Password, em.Adress))
+	err := e.Send("smtp.gmail.com:587", smtp.PlainAuth("", em.Email, em.Password, em.Adress))
+	return err
 }
 
 func (e *EmailHandler) Verify() http.HandlerFunc {
@@ -78,6 +77,7 @@ func (e *EmailHandler) Verify() http.HandlerFunc {
 			packages.ResponceJSON(w, "You are welcome!", 200)
 		} else {
 			packages.ResponceJSON(w, "Wrong register hash.", http.StatusUnauthorized)
+			e.Repo.Delete(hash)
 		}
 	}
 }

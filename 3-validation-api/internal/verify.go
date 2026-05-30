@@ -27,7 +27,7 @@ func NewEmailHandler(e EmailHandlerDeps) *EmailHandler {
 	return &EmailHandler{
 		Email:    e.Config.Email,
 		Password: e.Config.Password,
-		Adress:   e.Config.Adress,
+		Adress:   e.Config.Address,
 		Repo:     e.Repo,
 	}
 }
@@ -38,6 +38,7 @@ func (e *EmailHandler) ReciveEmail() http.HandlerFunc {
 		body, err := packages.DecodeJSON[EmailRequest](r.Body)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
 		}
 		valid := validator.New()
 		err = valid.Struct(body)

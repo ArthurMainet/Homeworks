@@ -3,6 +3,7 @@ package internal
 import (
 	"Email-API/config"
 	"Email-API/packages"
+	"log"
 	"net/http"
 	"net/smtp"
 
@@ -42,6 +43,7 @@ func (e *EmailHandler) ReciveEmail() http.HandlerFunc {
 		err = valid.Struct(body)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
 		}
 
 		// Закидываю емеил в функцию, которая генерит хэш и сует все это в мапу.
@@ -55,7 +57,10 @@ func (e *EmailHandler) ReciveEmail() http.HandlerFunc {
 		if err != nil {
 			packages.ResponceJSON(w, "Coudn't send mail. Retry please.", http.StatusInternalServerError)
 		}
-		e.Repo.Save()
+		err = e.Repo.Save()
+		if err != nil {
+			log.Println("Email and hash didn't save. Reason: ", err)
+		}
 
 	}
 }
@@ -72,8 +77,7 @@ func (em *EmailHandler) WritingEmail(mail, text string) error {
 func (e *EmailHandler) Verify() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		hash := r.PathValue("hash")
-		hashCheck := e.Repo.EmailAndHash[hash]
-		if hash == hashCheck.Hash {
+		if _, ok := e.Repo.EmailAndHash[hash]; ok {
 			packages.ResponceJSON(w, "You are welcome!", 200)
 		} else {
 			packages.ResponceJSON(w, "Wrong register hash.", http.StatusUnauthorized)

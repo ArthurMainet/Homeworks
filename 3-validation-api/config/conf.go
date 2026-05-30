@@ -10,6 +10,6 @@ func LoadConfig() *Config {
 	return &Config{
 		Email:    "testmail@gmail.com",
 		Password: "123",
-		Adress:   "mtp.gmail.com:587",
+		Adress:   "smtp.gmail.com:587",
 	}
 }

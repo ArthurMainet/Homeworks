@@ -1,11 +1,12 @@
 package packages
 
-import "net/http"
+import (
+	"Email-API/config"
+	"net/http"
+)
 
 type EmailHandlerDeps struct {
-	Email    string
-	Password string
-	Adress   string
+	Config *config.Config
 }
 
 type EmailHandler struct {
@@ -16,9 +17,9 @@ type EmailHandler struct {
 
 func NewEmailHandler(e EmailHandlerDeps) *EmailHandler {
 	return &EmailHandler{
-		Email:    e.Email,
-		Password: e.Password,
-		Adress:   e.Adress,
+		Email:    e.Config.Email,
+		Password: e.Config.Password,
+		Adress:   e.Config.Adress,
 	}
 }
 

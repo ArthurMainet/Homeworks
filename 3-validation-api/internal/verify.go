@@ -12,13 +12,14 @@ import (
 
 type EmailHandlerDeps struct {
 	Config *config.Config
+	Repo   *LocalRepo
 }
 
 type EmailHandler struct {
-	Email       string
-	Password    string
-	Adress      string
-	hashedEmail *EmailWithHash
+	Email    string
+	Password string
+	Adress   string
+	Repo     *LocalRepo
 }
 
 func NewEmailHandler(e EmailHandlerDeps) *EmailHandler {
@@ -26,6 +27,7 @@ func NewEmailHandler(e EmailHandlerDeps) *EmailHandler {
 		Email:    e.Config.Email,
 		Password: e.Config.Password,
 		Adress:   e.Config.Adress,
+		Repo:     e.Repo,
 	}
 }
 
@@ -42,11 +44,12 @@ func (e *EmailHandler) ReciveEmail() http.HandlerFunc {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 		}
 
-		hashedEmail := NewEmailWithHash(body.Email)
-		e.hashedEmail = hashedEmail
-		mail := e.hashedEmail.Email
-		hash := e.hashedEmail.Hash
-		text := "http://localhost:8081/verify/" + hash
+		// Закидываю емеил в функцию, которая генерит хэш и сует все это в мапу.
+		model := NewEmailWithHash(body.Email)
+		mail := model.Email
+		hash := model.Hash
+		e.Repo.EmailAndHash[hash] = model
+		text := "http://localhost:8080/verify/" + hash
 		e.WritingEmail(mail, text)
 
 		// сохраняем email с хешем, записывая ее в буфер, откуда потом прочитаем
@@ -70,8 +73,11 @@ func (em *EmailHandler) WritingEmail(mail, text string) {
 func (e *EmailHandler) Verify() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		hash := r.PathValue("hash")
-		if hash == e.hashedEmail.Hash {
+		hashCheck := e.Repo.EmailAndHash[hash]
+		if hash == hashCheck.Hash {
 			packages.ResponceJSON(w, "You are welcome!", 200)
+		} else {
+			packages.ResponceJSON(w, "Wrong register hash.", http.StatusUnauthorized)
 		}
 	}
 }

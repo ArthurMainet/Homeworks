@@ -9,9 +9,13 @@ import (
 
 func main() {
 	conf := config.LoadConfig()
+	repo := internal.NewLocalRepo()
 
 	router := http.NewServeMux()
-	info := internal.NewEmailHandler(internal.EmailHandlerDeps{Config: conf})
+	info := internal.NewEmailHandler(internal.EmailHandlerDeps{
+		Config: conf,
+		Repo:   repo,
+	})
 
 	router.HandleFunc("POST /send", info.ReciveEmail())
 	router.HandleFunc("GET /verify/{hash}", info.Verify())

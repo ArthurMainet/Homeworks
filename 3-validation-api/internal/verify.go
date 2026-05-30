@@ -74,7 +74,7 @@ func (em *EmailHandler) WritingEmail(mail, text string) error {
 	e.From = "BabyMelo <testbabymail@mail.ru>"
 	e.To = []string{mail}
 	e.Text = []byte(text)
-	err := e.Send("smtp.gmail.com:587", smtp.PlainAuth("", em.Email, em.Password, em.Adress))
+	err := e.Send(em.Adress, smtp.PlainAuth("", em.Email, em.Password, em.Adress))
 	return err
 }
 

@@ -9,19 +9,23 @@ import (
 
 func main() {
 	conf := config.LoadConfig()
+	repo := internal.NewLocalRepo()
 
 	router := http.NewServeMux()
-	info := internal.NewEmailHandler(internal.EmailHandlerDeps{Config: conf})
+	info := internal.NewEmailHandler(internal.EmailHandlerDeps{
+		Config: conf,
+		Repo:   repo,
+	})
 
 	router.HandleFunc("POST /send", info.ReciveEmail())
 	router.HandleFunc("GET /verify/{hash}", info.Verify())
 
 	server := http.Server{
-		Addr:    ":8080",
+		Addr:    ":8081",
 		Handler: router,
 	}
 
-	log.Println("Starting to listen on port :8080")
+	log.Println("Starting to listen on port :8081")
 	err := server.ListenAndServe()
 	if err != nil {
 		log.Fatalln(err)

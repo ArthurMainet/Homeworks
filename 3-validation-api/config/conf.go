@@ -3,13 +3,13 @@ package config
 type Config struct {
 	Email    string
 	Password string
-	Adress   string
+	Address  string
 }
 
 func LoadConfig() *Config {
 	return &Config{
 		Email:    "testmail@gmail.com",
 		Password: "123",
-		Adress:   "mtp.gmail.com:587",
+		Address:  "smtp.gmail.com:587",
 	}
 }

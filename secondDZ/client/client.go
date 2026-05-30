@@ -7,9 +7,7 @@ import (
 )
 
 func main() {
-
 	client := http.Client{}
-
 	resp, err := client.Get("http://localhost:8080/test")
 	if err != nil {
 		log.Fatalln(err)

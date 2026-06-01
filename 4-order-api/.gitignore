@@ -1,0 +1,4 @@
+/verify.json
+/docker-compose.yml
+/.env
+/postgres_data

@@ -2,6 +2,7 @@ package middlewares
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/sirupsen/logrus"
 )
@@ -13,6 +14,7 @@ func Logging(next http.Handler) http.Handler {
 		logrus.WithFields(logrus.Fields{
 			"Method": method,
 			"Path":   path,
+			"Time":   time.Now(),
 		}).Info("Логирование метода и функции.")
 		next.ServeHTTP(w, r)
 	})

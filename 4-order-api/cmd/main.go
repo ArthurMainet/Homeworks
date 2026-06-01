@@ -6,7 +6,6 @@ import (
 	"Email-API/internal/verify"
 	"Email-API/packages/db"
 	"Email-API/packages/middlewares"
-	"fmt"
 	"log"
 	"net/http"
 )
@@ -18,12 +17,15 @@ func main() {
 	db := db.NewDB(conf)
 	localrepo := verify.NewLocalRepo()
 	productRepo := products.NewProductRepository(db)
-	fmt.Println(productRepo)
 
 	router := http.NewServeMux()
+
 	verify.NewEmailHandler(router, verify.EmailHandlerDeps{
 		Config: conf.EmailConf,
 		Repo:   localrepo,
+	})
+	products.NewProductHandler(router, products.ProductHandlerDeps{
+		ProductRepository: productRepo,
 	})
 
 	server := http.Server{

@@ -32,6 +32,7 @@ func (pr *ProductRepository) Update(product *Product) (*Product, error) {
 		log.Println("Can't update: ", result.Error)
 		return nil, result.Error
 	}
+	pr.Database.Save(&product)
 	return product, nil
 }
 
@@ -48,7 +49,7 @@ func (pr *ProductRepository) GetByID(id int) (*Product, error) {
 	var product Product
 	result := pr.Database.First(&product, " id = ?", id)
 	if result.Error != nil {
-		log.Println("Can't update: ", result.Error)
+		log.Println("Can't find by ID: ", result.Error)
 		return nil, result.Error
 	}
 	return &product, nil

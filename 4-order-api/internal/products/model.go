@@ -7,9 +7,9 @@ import (
 
 type Product struct {
 	gorm.Model
-	Name        string         `json:"name"`
-	Description string         `json:"description"`
-	Images      pq.StringArray `json:"images" gorm:"type:text[]"`
+	Name        string         `json:"name" gorm:"uniqueIndex"`
+	Description string         `json:"description" gorm:"uniqueIndex"`
+	Images      pq.StringArray `json:"images" gorm:"type:text[],uniqueIndex"`
 	Price       float64        `json:"price"`
 }
 

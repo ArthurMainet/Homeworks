@@ -20,10 +20,27 @@ func NewProductHandler(router *http.ServeMux, deps ProductHandlerDeps) {
 	prHandler := &ProductHandler{
 		ProductRepository: deps.ProductRepository,
 	}
+	router.HandleFunc("GET /products/{id}", prHandler.GetbyID())
 	router.HandleFunc("POST /products", prHandler.Create())
 	router.HandleFunc("PUT /products/{id}", prHandler.fullUpdate())
 	router.HandleFunc("PATCH /products/{id}", prHandler.Update())
 	router.HandleFunc("DELETE /products/{id}", prHandler.Delete())
+}
+
+func (handler *ProductHandler) GetbyID() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		id, err := strconv.Atoi(r.PathValue("id"))
+		if err != nil {
+			http.Error(w, "Invalid ID.", http.StatusBadRequest)
+			return
+		}
+		product, err := handler.ProductRepository.GetByID(id)
+		if err != nil {
+			http.Error(w, "No products with this ID.", http.StatusNotFound)
+			return
+		}
+		packages.ResponceJSON(w, product, http.StatusOK)
+	}
 }
 
 func (handler *ProductHandler) Create() http.HandlerFunc {

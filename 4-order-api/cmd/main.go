@@ -7,6 +7,8 @@ import (
 	"net/http"
 )
 
+// Added new information to check HW
+
 func main() {
 	conf := config.LoadConfig()
 	repo := verify.NewLocalRepo()

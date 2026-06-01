@@ -3,6 +3,7 @@ package main
 import (
 	"Email-API/config"
 	"Email-API/internal/verify"
+	"Email-API/packages/db"
 	"log"
 	"net/http"
 )
@@ -11,6 +12,7 @@ import (
 
 func main() {
 	conf := config.LoadConfig()
+	db := db.NewDB(conf)
 	repo := verify.NewLocalRepo()
 
 	router := http.NewServeMux()

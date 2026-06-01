@@ -23,13 +23,15 @@ type EmailHandler struct {
 	Repo     *LocalRepo
 }
 
-func NewEmailHandler(e EmailHandlerDeps) *EmailHandler {
-	return &EmailHandler{
+func NewEmailHandler(router *http.ServeMux, e EmailHandlerDeps) {
+	mail := &EmailHandler{
 		Email:    e.Config.Email,
 		Password: e.Config.Password,
 		Adress:   e.Config.Address,
 		Repo:     e.Repo,
 	}
+	router.HandleFunc("POST /send", mail.ReciveEmail())
+	router.HandleFunc("GET /verify/{hash}", mail.Verify())
 }
 
 func (e *EmailHandler) ReciveEmail() http.HandlerFunc {

@@ -2,8 +2,11 @@ package main
 
 import (
 	"Email-API/config"
+	"Email-API/internal/products"
 	"Email-API/internal/verify"
 	"Email-API/packages/db"
+	"Email-API/packages/middlewares"
+	"fmt"
 	"log"
 	"net/http"
 )
@@ -13,20 +16,19 @@ import (
 func main() {
 	conf := config.LoadConfig()
 	db := db.NewDB(conf)
-	repo := verify.NewLocalRepo()
+	localrepo := verify.NewLocalRepo()
+	productRepo := products.NewProductRepository(db)
+	fmt.Println(productRepo)
 
 	router := http.NewServeMux()
-	info := verify.NewEmailHandler(verify.EmailHandlerDeps{
+	verify.NewEmailHandler(router, verify.EmailHandlerDeps{
 		Config: conf.EmailConf,
-		Repo:   repo,
+		Repo:   localrepo,
 	})
-
-	router.HandleFunc("POST /send", info.ReciveEmail())
-	router.HandleFunc("GET /verify/{hash}", info.Verify())
 
 	server := http.Server{
 		Addr:    ":8081",
-		Handler: router,
+		Handler: middlewares.Logging(router),
 	}
 
 	log.Println("Starting to listen on port :8081")

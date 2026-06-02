@@ -52,7 +52,7 @@ func (handler *ProductHandler) Create() http.HandlerFunc {
 		}
 		err = packages.Validate[ProductRequest](body)
 		if err != nil {
-			http.Error(w, "Invalid request", http.StatusBadRequest)
+			packages.ResponceJSON(w, err, http.StatusBadRequest)
 			return
 		}
 		product := NewProduct(body)
@@ -73,6 +73,12 @@ func (handler *ProductHandler) fullUpdate() http.HandlerFunc {
 			return
 		}
 
+		product, err := handler.ProductRepository.GetByID(id)
+		if err != nil {
+			http.Error(w, "No data with this ID.", http.StatusNotFound)
+			return
+		}
+
 		body, err := packages.DecodeJSON[ProductRequest](r.Body)
 		if err != nil {
 			http.Error(w, "Invalid request", http.StatusBadRequest)
@@ -80,15 +86,15 @@ func (handler *ProductHandler) fullUpdate() http.HandlerFunc {
 		}
 		err = packages.Validate[ProductRequest](body)
 		if err != nil {
-			http.Error(w, "Invalid request", http.StatusBadRequest)
+			packages.ResponceJSON(w, err, http.StatusBadRequest)
 			return
 		}
 
-		product, err := handler.ProductRepository.GetByID(id)
-		if err != nil {
-			http.Error(w, "No data with this ID.", http.StatusNotFound)
-			return
-		}
+		product.Name = body.Name
+		product.Description = body.Description
+		product.Images = body.Images
+		product.Price = body.Price
+
 		updatedProduct, err := handler.ProductRepository.Update(product)
 		if err != nil {
 			http.Error(w, "Update error", http.StatusInternalServerError)
@@ -113,7 +119,7 @@ func (handler *ProductHandler) Update() http.HandlerFunc {
 		}
 		err = packages.Validate[UpdateProductRequest](body)
 		if err != nil {
-			http.Error(w, "Invalid request", http.StatusBadRequest)
+			packages.ResponceJSON(w, err, http.StatusBadRequest)
 			return
 		}
 

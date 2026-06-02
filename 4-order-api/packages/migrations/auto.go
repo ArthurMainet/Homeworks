@@ -2,6 +2,7 @@ package main
 
 import (
 	"Email-API/internal/products"
+	"Email-API/internal/user"
 	"os"
 
 	"github.com/joho/godotenv"
@@ -19,7 +20,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	err = db.AutoMigrate(&products.Product{})
+	err = db.AutoMigrate(&products.Product{}, &user.UserModel{})
 	if err != nil {
 		panic(err)
 	}

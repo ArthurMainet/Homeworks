@@ -8,7 +8,7 @@ import (
 )
 
 type ProductHandlerDeps struct {
-	Config            *config.ProductConfig
+	Config            *config.AuthConfig
 	ProductRepository *ProductRepository
 }
 

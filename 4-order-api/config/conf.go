@@ -10,7 +10,7 @@ import (
 type Config struct {
 	EmailConf *EmailConfig
 	DB        *DbConfig
-	AuthToken *ProductConfig
+	AuthToken *AuthConfig
 }
 
 type EmailConfig struct {
@@ -23,7 +23,7 @@ type DbConfig struct {
 	DSN string
 }
 
-type ProductConfig struct {
+type AuthConfig struct {
 	AuthToken string
 }
 
@@ -41,7 +41,7 @@ func LoadConfig() *Config {
 		DB: &DbConfig{
 			DSN: os.Getenv("DSN"),
 		},
-		AuthToken: &ProductConfig{
+		AuthToken: &AuthConfig{
 			AuthToken: os.Getenv("TOKEN"),
 		},
 	}

@@ -20,7 +20,7 @@ func (err ValidationErrors) Error() string {
 	return "validation failed"
 }
 
-// Нужно дописать разбор конкретных ошибок на случай проблем с валидацией
+// Паттерн обработки ошибок валидации для удобства фронта.
 func Validate[T any](isValid T) error {
 	validate := validator.New()
 	err := validate.Struct(isValid)

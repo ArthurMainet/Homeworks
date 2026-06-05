@@ -38,10 +38,10 @@ func NewEmailService(deps *EmailServiceDeps) *EmailService {
 func (e *EmailService) ReciveEmail(email string) error {
 
 	// Закидываю емеил в функцию, которая генерит хэш и сует все это в мапу.
-	model := NewEmailWithHash("email", email)
-	mail := model.AdrressOrSession
+	model := NewEmailWithHash(email)
+	mail := model.Email
 	hash := model.Hash
-	e.Repo.AdrressAndHash[model.Method][model.Hash] = model
+	e.Repo.EmailAndHash[hash] = model
 	text := "http://localhost:8081/verify/" + hash
 
 	err := e.WritingEmail(mail, text)
@@ -49,7 +49,7 @@ func (e *EmailService) ReciveEmail(email string) error {
 		return errors.New("Send message error.")
 	}
 
-	err = e.Repo.Save()
+	err = e.Repo.SaveEmailHash()
 	if err != nil {
 		log.Println("Email and hash didn't save. Reason: ", err)
 	}

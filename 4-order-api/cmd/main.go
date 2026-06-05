@@ -30,6 +30,7 @@ func main() {
 	phoneService := verify.NewPhoneService(&verify.PhoneServiceDeps{
 		Repo:           localrepo,
 		UserRepository: userRepo,
+		JWT:            conf.AuthToken,
 	})
 	authService := auth.NewAuthService(&auth.AuthServiceDeps{
 		Repo:         userRepo,

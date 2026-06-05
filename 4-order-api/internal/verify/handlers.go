@@ -22,49 +22,58 @@ func NewVerifyHandler(router *http.ServeMux, deps VerifyHandlerDeps) {
 		PhoneService: deps.PhoneService,
 	}
 	//	router.HandleFunc("POST /send", mail.ReciveEmail())
-	router.HandleFunc("GET /verify/{method}/{hash}", service.Verify())
+	router.HandleFunc("GET /verify/email/{hash}", service.EmailVerify())
+	router.HandleFunc("POST /verify/phone/", service.PhoneVerify())
 }
 
-func (e *VerifyHandler) Verify() http.HandlerFunc {
+func (e *VerifyHandler) EmailVerify() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		method := r.PathValue("method")
 		hash := r.PathValue("hash")
 
-		if method == "email" {
-			if _, ok := e.EmailService.Repo.AdrressAndHash[method][hash]; ok {
-				responce.ResponceJSON(w, "You are welcome!", 200)
-				e.EmailService.AprooveVerif(e.EmailService.Repo.AdrressAndHash[method][hash].AdrressOrSession)
-			} else {
-				responce.ResponceJSON(w, "Wrong register hash.", http.StatusUnauthorized)
-			}
-			e.EmailService.Repo.Delete(method, hash)
-			e.EmailService.Repo.Save()
+		if _, ok := e.EmailService.Repo.EmailAndHash[hash]; ok {
+			responce.ResponceJSON(w, "You are welcome!", 200)
+			e.EmailService.AprooveVerif(e.EmailService.Repo.EmailAndHash[hash].Email)
+		} else {
+			responce.ResponceJSON(w, "Wrong register hash.", http.StatusUnauthorized)
 			return
-		} else if method == "phone" {
-			body, err := api.DecodeJSON[SessionVerifRequest](r.Body)
-			if err != nil {
-				http.Error(w, "Invaild data", 402)
-				return
-			}
-			if e.PhoneService.Repo.AdrressAndHash[method][body.Code].AdrressOrSession == hash {
-				responce.ResponceJSON(w, "You are welcome!", 200)
-				token, err := e.PhoneService.AprooveVerif(e.PhoneService.Repo.AdrressAndHash[method][hash].AdrressOrSession)
-				if err != nil {
-					http.Error(w, "verif user error", 502)
-					return
-				}
-
-				http.SetCookie(w, &http.Cookie{
-					Name:     "accessToken",
-					Value:    token,
-					MaxAge:   21600,
-					HttpOnly: true,
-				})
-
-			} else {
-				responce.ResponceJSON(w, "Wrong code.", http.StatusUnauthorized)
-			}
 		}
 
+		e.EmailService.Repo.DeleteEmail(hash)
+		e.EmailService.Repo.SaveEmailHash()
 	}
+}
+
+func (e *VerifyHandler) PhoneVerify() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+
+		body, err := api.DecodeJSON[SessionVerifRequest](r.Body)
+		if err != nil {
+			http.Error(w, "Invaild data", 402)
+			return
+		}
+
+		if e.PhoneService.Repo.PhoneAndCode[body.Code].Session == body.Session {
+
+			token, err := e.PhoneService.AprooveVerif(e.PhoneService.Repo.PhoneAndCode[body.Code].Phone)
+			if err != nil {
+				http.Error(w, "verif user error", 502)
+				return
+			}
+
+			http.SetCookie(w, &http.Cookie{
+				Name:     "accessToken",
+				Value:    token,
+				MaxAge:   21600,
+				HttpOnly: true,
+			})
+			responce.ResponceJSON(w, "You are welcome!", 200)
+
+		} else {
+			responce.ResponceJSON(w, "Wrong code.", http.StatusUnauthorized)
+		}
+
+		e.PhoneService.Repo.DeleteSession(body.Code)
+		e.PhoneService.Repo.SaveSessionCode()
+	}
+
 }

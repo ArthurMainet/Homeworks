@@ -2,5 +2,5 @@ package verify
 
 type SessionVerifRequest struct {
 	Session string `json:"session"`
-	Code    string `json:"code"`
+	Code    int    `json:"code"`
 }

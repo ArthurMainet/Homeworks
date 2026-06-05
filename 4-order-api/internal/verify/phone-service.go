@@ -1,6 +1,7 @@
 package verify
 
 import (
+	"Email-API/config"
 	"Email-API/internal/user"
 	"Email-API/packages/jwt"
 	"errors"
@@ -14,7 +15,7 @@ import (
 type PhoneServiceDeps struct {
 	Repo           *LocalRepo
 	UserRepository *user.UserRepository
-	JWT            *jwt.JWT
+	JWT            *config.AuthConfig
 }
 
 type PhoneService struct {
@@ -27,24 +28,25 @@ func NewPhoneService(deps *PhoneServiceDeps) *PhoneService {
 	return &PhoneService{
 		Repo:           deps.Repo,
 		UserRepository: deps.UserRepository,
-		JWT:            deps.JWT,
+		JWT: &jwt.JWT{
+			Secret: deps.JWT.AuthToken,
+		},
 	}
 }
 
 func (ps *PhoneService) SendCode(session, address string) (string, error) {
-	data := NewEmailWithHash("phone", session)
-	repo := NewLocalRepo()
+	data := NewSessionWithCode(session)
 
-	err := sendingCode(data.Hash, address)
+	err := sendingCode(data.Code, address)
 	if err != nil {
 		return "", errors.New("Send code error")
 	}
-	repo.AdrressAndHash["phone"][data.Hash] = data
+	ps.Repo.PhoneAndCode[data.Code] = data
 
-	return data.Hash, nil
+	return data.Session, nil
 }
 
-func sendingCode(code, address string) error {
+func sendingCode(code int, address string) error {
 	// здесь фукнция которая типа отсылает код "code"
 	// возвращаем nil потому что все прошло успешно
 	return nil

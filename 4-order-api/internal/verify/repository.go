@@ -6,39 +6,72 @@ import (
 )
 
 type LocalRepo struct {
-	AdrressAndHash map[string]map[string]*EmailWithHash
+	EmailAndHash map[string]*EmailWithHash
+	PhoneAndCode map[int]*SessionWithCode
 }
 
-var storageFile string = "verify.json"
+var emailFile string = "verifyEmail.json"
+var sessionFile string = "verifySession.json"
 
 func NewLocalRepo() *LocalRepo {
 	repo := LocalRepo{
-		AdrressAndHash: make(map[string]map[string]*EmailWithHash),
+		EmailAndHash: make(map[string]*EmailWithHash),
+		PhoneAndCode: make(map[int]*SessionWithCode),
 	}
-	repo.Load()
+	repo.LoadEmailData()
 	return &repo
 }
 
-func (l *LocalRepo) Load() error {
-	data, err := os.ReadFile(storageFile)
+//////////////////////////////////
+////////// Phone REPO ///////////
+
+func (l *LocalRepo) LoadPhoneData() error {
+	data, err := os.ReadFile(sessionFile)
 	if err != nil {
 		if os.IsNotExist(err) {
 			return nil
 		}
 		return err
 	}
-	return json.Unmarshal(data, &l.AdrressAndHash)
+	return json.Unmarshal(data, &l.PhoneAndCode)
 }
 
-func (l *LocalRepo) Save() error {
-	data, err := json.MarshalIndent(l.AdrressAndHash, "", " ")
+func (l *LocalRepo) SaveSessionCode() error {
+	data, err := json.MarshalIndent(l.PhoneAndCode, "", " ")
 	if err != nil {
 		return err
 	}
-	os.WriteFile(storageFile, data, 0644)
+	os.WriteFile(sessionFile, data, 0644)
 	return nil
 }
 
-func (l *LocalRepo) Delete(method, hash string) {
-	delete(l.AdrressAndHash[method], hash)
+func (l *LocalRepo) DeleteSession(code int) {
+	delete(l.PhoneAndCode, code)
+}
+
+//////////////////////////////////
+////////// EMAIL REPO ///////////
+
+func (l *LocalRepo) LoadEmailData() error {
+	data, err := os.ReadFile(emailFile)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return nil
+		}
+		return err
+	}
+	return json.Unmarshal(data, &l.EmailAndHash)
+}
+
+func (l *LocalRepo) SaveEmailHash() error {
+	data, err := json.MarshalIndent(l.EmailAndHash, "", " ")
+	if err != nil {
+		return err
+	}
+	os.WriteFile(emailFile, data, 0644)
+	return nil
+}
+
+func (l *LocalRepo) DeleteEmail(hash string) {
+	delete(l.EmailAndHash, hash)
 }

@@ -39,7 +39,7 @@ func (pr *ProductRepository) Update(product *Product) (*Product, error) {
 func (pr *ProductRepository) Delete(id int) error {
 	result := pr.Database.Delete(&Product{}, id)
 	if result.Error != nil {
-		log.Println("Can't create: ", result.Error)
+		log.Println("Can't delete: ", result.Error)
 		return result.Error
 	}
 	return nil

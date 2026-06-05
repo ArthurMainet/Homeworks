@@ -13,7 +13,7 @@ type Product struct {
 	Price       float64        `json:"price"`
 }
 
-func NewProduct(productReq ProductRequest) *Product {
+func NewProduct(productReq *ProductRequest) *Product {
 	return &Product{
 		Name:        productReq.Name,
 		Description: productReq.Description,

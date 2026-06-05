@@ -6,14 +6,14 @@ import (
 )
 
 type LocalRepo struct {
-	EmailAndHash map[string]*EmailWithHash
+	AdrressAndHash map[string]map[string]*EmailWithHash
 }
 
 var storageFile string = "verify.json"
 
 func NewLocalRepo() *LocalRepo {
 	repo := LocalRepo{
-		EmailAndHash: make(map[string]*EmailWithHash),
+		AdrressAndHash: make(map[string]map[string]*EmailWithHash),
 	}
 	repo.Load()
 	return &repo
@@ -27,11 +27,11 @@ func (l *LocalRepo) Load() error {
 		}
 		return err
 	}
-	return json.Unmarshal(data, &l.EmailAndHash)
+	return json.Unmarshal(data, &l.AdrressAndHash)
 }
 
 func (l *LocalRepo) Save() error {
-	data, err := json.MarshalIndent(l.EmailAndHash, "", " ")
+	data, err := json.MarshalIndent(l.AdrressAndHash, "", " ")
 	if err != nil {
 		return err
 	}
@@ -39,6 +39,6 @@ func (l *LocalRepo) Save() error {
 	return nil
 }
 
-func (l *LocalRepo) Delete(hash string) {
-	delete(l.EmailAndHash, hash)
+func (l *LocalRepo) Delete(method, hash string) {
+	delete(l.AdrressAndHash[method], hash)
 }

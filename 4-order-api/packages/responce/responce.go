@@ -1,4 +1,4 @@
-package packages
+package responce
 
 import (
 	"encoding/json"

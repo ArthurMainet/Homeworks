@@ -1,18 +1,34 @@
 package verify
 
-import "math/rand/v2"
+import (
+	"math/rand/v2"
+	"strconv"
+)
 
 type EmailWithHash struct {
 	Email string `json:"email"`
 	Hash  string `json:"hash"`
 }
 
-var letters = []rune("qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM1234567890!?")
+type SessionWithCode struct {
+	Phone   string `json:"phone"`
+	Session string `json:"session"`
+	Code    int    `json:"code"`
+}
 
-func NewEmailWithHash(email string) *EmailWithHash {
+var letters = []rune("qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM1234567890!?")
+var nums = []rune("0123456789")
+
+func NewEmailWithHash(adrress string) *EmailWithHash {
 	return &EmailWithHash{
-		Email: email,
+		Email: adrress,
 		Hash:  GenerateHash(10),
+	}
+}
+func NewSessionWithCode(session string) *SessionWithCode {
+	return &SessionWithCode{
+		Session: session,
+		Code:    GenerateCode(4),
 	}
 }
 
@@ -23,4 +39,14 @@ func GenerateHash(n int) string {
 	}
 	hash := string(runes)
 	return hash
+}
+
+func GenerateCode(n int) int {
+	runes := make([]rune, n)
+	for i, _ := range runes {
+		runes[i] = letters[rand.IntN(len(nums))]
+	}
+	codeStr := string(runes)
+	code, _ := strconv.Atoi(codeStr)
+	return code
 }

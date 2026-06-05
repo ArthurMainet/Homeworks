@@ -2,7 +2,9 @@ package products
 
 import (
 	"Email-API/config"
-	"Email-API/packages"
+	"Email-API/packages/api"
+	"Email-API/packages/middlewares"
+	"Email-API/packages/responce"
 	"net/http"
 	"strconv"
 )
@@ -14,17 +16,19 @@ type ProductHandlerDeps struct {
 
 type ProductHandler struct {
 	ProductRepository *ProductRepository
+	Config            *config.AuthConfig
 }
 
 func NewProductHandler(router *http.ServeMux, deps ProductHandlerDeps) {
 	prHandler := &ProductHandler{
 		ProductRepository: deps.ProductRepository,
+		Config:            deps.Config,
 	}
 	router.HandleFunc("GET /products/{id}", prHandler.GetbyID())
 	router.HandleFunc("POST /products", prHandler.Create())
 	router.HandleFunc("PUT /products/{id}", prHandler.fullUpdate())
 	router.HandleFunc("PATCH /products/{id}", prHandler.Update())
-	router.HandleFunc("DELETE /products/{id}", prHandler.Delete())
+	router.Handle("DELETE /products/{id}", middlewares.IsAuth(prHandler.Delete(), prHandler.Config))
 }
 
 func (handler *ProductHandler) GetbyID() http.HandlerFunc {
@@ -39,20 +43,15 @@ func (handler *ProductHandler) GetbyID() http.HandlerFunc {
 			http.Error(w, "No products with this ID.", http.StatusNotFound)
 			return
 		}
-		packages.ResponceJSON(w, product, http.StatusOK)
+		responce.ResponceJSON(w, product, http.StatusOK)
 	}
 }
 
 func (handler *ProductHandler) Create() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		body, err := packages.DecodeJSON[ProductRequest](r.Body)
+		body, err := api.HandleReq[ProductRequest](w, r)
 		if err != nil {
 			http.Error(w, "Invalid form.", http.StatusBadRequest)
-			return
-		}
-		err = packages.Validate[ProductRequest](body)
-		if err != nil {
-			packages.ResponceJSON(w, err, http.StatusBadRequest)
 			return
 		}
 		product := NewProduct(body)
@@ -61,7 +60,7 @@ func (handler *ProductHandler) Create() http.HandlerFunc {
 			http.Error(w, "Didn't create. Retry please.", http.StatusBadGateway)
 			return
 		}
-		packages.ResponceJSON(w, "Product created successfully", 200)
+		responce.ResponceJSON(w, "Product created successfully", 200)
 	}
 }
 
@@ -79,14 +78,9 @@ func (handler *ProductHandler) fullUpdate() http.HandlerFunc {
 			return
 		}
 
-		body, err := packages.DecodeJSON[ProductRequest](r.Body)
+		body, err := api.HandleReq[ProductRequest](w, r)
 		if err != nil {
 			http.Error(w, "Invalid request", http.StatusBadRequest)
-			return
-		}
-		err = packages.Validate[ProductRequest](body)
-		if err != nil {
-			packages.ResponceJSON(w, err, http.StatusBadRequest)
 			return
 		}
 
@@ -100,7 +94,7 @@ func (handler *ProductHandler) fullUpdate() http.HandlerFunc {
 			http.Error(w, "Update error", http.StatusInternalServerError)
 			return
 		}
-		packages.ResponceJSON(w, updatedProduct, 200)
+		responce.ResponceJSON(w, updatedProduct, 200)
 	}
 }
 
@@ -112,14 +106,9 @@ func (handler *ProductHandler) Update() http.HandlerFunc {
 			return
 		}
 
-		body, err := packages.DecodeJSON[UpdateProductRequest](r.Body)
+		body, err := api.HandleReq[UpdateProductRequest](w, r)
 		if err != nil {
 			http.Error(w, "Invalid request", http.StatusBadRequest)
-			return
-		}
-		err = packages.Validate[UpdateProductRequest](body)
-		if err != nil {
-			packages.ResponceJSON(w, err, http.StatusBadRequest)
 			return
 		}
 
@@ -147,7 +136,7 @@ func (handler *ProductHandler) Update() http.HandlerFunc {
 			http.Error(w, "Update error", http.StatusInternalServerError)
 			return
 		}
-		packages.ResponceJSON(w, updatedProduct, 200)
+		responce.ResponceJSON(w, updatedProduct, 200)
 	}
 }
 
@@ -171,6 +160,6 @@ func (handler *ProductHandler) Delete() http.HandlerFunc {
 			return
 		}
 
-		packages.ResponceJSON(w, "Product successfully delete.", http.StatusOK)
+		responce.ResponceJSON(w, "Product successfully delete.", http.StatusOK)
 	}
 }

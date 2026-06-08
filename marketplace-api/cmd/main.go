@@ -3,6 +3,7 @@ package main
 import (
 	"Email-API/config"
 	"Email-API/internal/auth"
+	"Email-API/internal/order"
 	"Email-API/internal/products"
 	"Email-API/internal/user"
 	"Email-API/internal/verify"
@@ -18,6 +19,7 @@ func main() {
 	localrepo := verify.NewLocalRepo()
 	productRepo := products.NewProductRepository(db)
 	userRepo := user.NewUserRepository(db)
+	orderRepo := order.NewOrderRepository(db)
 
 	router := http.NewServeMux()
 
@@ -38,7 +40,14 @@ func main() {
 		PhoneService: phoneService,
 		JWT:          conf.AuthToken,
 	})
+	orderService := order.NewOrderService(&order.OrderServiceDeps{
+		Repo: orderRepo,
+	})
 
+	// Handlers
+	order.NewOrderHandlers(router, order.OrderHandlersDeps{
+		OrderService: orderService,
+	})
 	verify.NewVerifyHandler(router, verify.VerifyHandlerDeps{
 		EmailService: emailService,
 		PhoneService: phoneService,

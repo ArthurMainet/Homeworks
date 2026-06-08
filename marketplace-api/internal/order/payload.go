@@ -1,8 +1,6 @@
 package order
 
-import "Email-API/internal/products"
-
 type OrderRequest struct {
-	UserID   uint
-	Products []products.Product
+	UserID     uint   `json:"userId"`
+	ProductIDs []uint `json:"product_ids" validate:"required,min=1,dive,gt=0"`
 }

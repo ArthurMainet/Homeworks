@@ -23,7 +23,7 @@ func (repo *OrderRepository) Create(order *Order) (*Order, error) {
 
 func (repo *OrderRepository) GetOrderById(id uint) (*Order, error) {
 	var order Order
-	result := repo.Repo.DB.Find(&order, "id = ?", id)
+	result := repo.Repo.DB.Preload("Products").Find(&order, "id = ?", id)
 	if result.Error != nil {
 		return nil, result.Error
 	}
@@ -31,10 +31,10 @@ func (repo *OrderRepository) GetOrderById(id uint) (*Order, error) {
 }
 
 func (repo *OrderRepository) GetOrderByUserId(id uint) (*[]Order, error) {
-	var order []Order
-	result := repo.Repo.DB.Find(&order, "user_id = ?", id)
+	var orders []Order
+	result := repo.Repo.DB.Preload("Products").Find(&orders, "user_id = ?", id)
 	if result.Error != nil {
 		return nil, result.Error
 	}
-	return &order, nil
+	return &orders, nil
 }

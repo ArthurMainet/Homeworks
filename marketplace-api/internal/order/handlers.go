@@ -1,7 +1,9 @@
 package order
 
 import (
+	"Email-API/config"
 	"Email-API/packages/api"
+	"Email-API/packages/middlewares"
 	"Email-API/packages/responce"
 	"log"
 	"net/http"
@@ -10,20 +12,23 @@ import (
 
 type OrderHandlersDeps struct {
 	OrderService *OrderService
+	AuthConfig   *config.AuthConfig
 }
 
 type OrderHandlers struct {
 	OrderService *OrderService
+	AuthConfig   *config.AuthConfig
 }
 
 func NewOrderHandlers(router *http.ServeMux, deps OrderHandlersDeps) {
 	orderHandlers := &OrderHandlers{
 		OrderService: deps.OrderService,
+		AuthConfig:   deps.AuthConfig,
 	}
 
-	router.HandleFunc("POST /order", orderHandlers.CreateOrder())
-	router.HandleFunc("GET /order/{id}", orderHandlers.GetOrderByID())
-	router.HandleFunc("GET /my-orders", orderHandlers.GetUserOrders())
+	router.Handle("POST /order", middlewares.IsUserAuth(orderHandlers.CreateOrder(), orderHandlers.AuthConfig))
+	router.Handle("GET /order/{id}", middlewares.IsUserAuth(orderHandlers.GetOrderByID(), orderHandlers.AuthConfig))
+	router.Handle("GET /my-orders", middlewares.IsUserAuth(orderHandlers.GetUserOrders(), orderHandlers.AuthConfig))
 }
 
 func (handler *OrderHandlers) CreateOrder() http.HandlerFunc {
@@ -44,7 +49,12 @@ func (handler *OrderHandlers) CreateOrder() http.HandlerFunc {
 		userId, _ := strconv.Atoi(cookie.Value)
 
 		products, err := handler.OrderService.GetProducts(body.ProductIDs)
-		order := NewOrder(products, uint(userId))
+		if err != nil {
+			http.Error(w, "DB err", http.StatusBadRequest)
+			log.Println(err)
+			return
+		}
+		order := NewOrder(uint(userId), products)
 
 		_, err = handler.OrderService.Create(order)
 		if err != nil {
@@ -52,6 +62,8 @@ func (handler *OrderHandlers) CreateOrder() http.HandlerFunc {
 			log.Println(err)
 			return
 		}
+
+		responce.ResponceJSON(w, "Order created", http.StatusOK)
 	}
 }
 

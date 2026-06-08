@@ -26,7 +26,7 @@ func (service *OrderService) Create(order *Order) (*Order, error) {
 
 func (service *OrderService) GetProducts(ids []uint) ([]products.Product, error) {
 	var products []products.Product
-	result := service.Repo.Repo.Find(&products, "id = ?", ids)
+	result := service.Repo.Repo.Find(&products, ids)
 	if result.Error != nil {
 		return nil, result.Error
 	}

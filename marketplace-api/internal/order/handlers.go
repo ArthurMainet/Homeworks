@@ -52,6 +52,8 @@ func (handler *OrderHandlers) CreateOrder() http.HandlerFunc {
 			log.Println(err)
 			return
 		}
+
+		responce.ResponceJSON(w, "Order created", http.StatusOK)
 	}
 }
 

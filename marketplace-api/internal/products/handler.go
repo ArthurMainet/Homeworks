@@ -28,7 +28,7 @@ func NewProductHandler(router *http.ServeMux, deps ProductHandlerDeps) {
 	router.HandleFunc("POST /products", prHandler.Create())
 	router.HandleFunc("PUT /products/{id}", prHandler.fullUpdate())
 	router.HandleFunc("PATCH /products/{id}", prHandler.Update())
-	router.Handle("DELETE /products/{id}", middlewares.IsAuth(prHandler.Delete(), prHandler.Config))
+	router.Handle("DELETE /products/{id}", middlewares.IsAdminAuth(prHandler.Delete(), prHandler.Config))
 }
 
 func (handler *ProductHandler) GetbyID() http.HandlerFunc {

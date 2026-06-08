@@ -47,6 +47,7 @@ func main() {
 	// Handlers
 	order.NewOrderHandlers(router, order.OrderHandlersDeps{
 		OrderService: orderService,
+		AuthConfig:   conf.AuthToken,
 	})
 	verify.NewVerifyHandler(router, verify.VerifyHandlerDeps{
 		EmailService: emailService,

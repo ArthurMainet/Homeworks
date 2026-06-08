@@ -12,7 +12,7 @@ type Order struct {
 	Products []products.Product `json:"products" gorm:"many2many:order_products,constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 }
 
-func NewOrder(products []int, userid uint) *Order {
+func NewOrder(userid uint, products []products.Product) *Order {
 	return &Order{
 		UserID:   userid,
 		Products: products,

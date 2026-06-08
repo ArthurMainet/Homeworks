@@ -44,7 +44,12 @@ func (handler *OrderHandlers) CreateOrder() http.HandlerFunc {
 		userId, _ := strconv.Atoi(cookie.Value)
 
 		products, err := handler.OrderService.GetProducts(body.ProductIDs)
-		order := NewOrder(products, uint(userId))
+		if err != nil {
+			http.Error(w, "DB err", http.StatusBadRequest)
+			log.Println(err)
+			return
+		}
+		order := NewOrder(uint(userId), products)
 
 		_, err = handler.OrderService.Create(order)
 		if err != nil {
